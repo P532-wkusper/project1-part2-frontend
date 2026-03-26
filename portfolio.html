@@ -14,6 +14,14 @@
       <a href="feed.html">Feed</a>
       <a href="history.html">History</a>
     </nav>
+    <div style="float: right; padding: 10px;">
+      <label for="user-select" style="color: white; margin-right: 5px;">User:</label>
+      <select id="user-select" style="padding: 5px;">
+        <option value="user1">user1</option>
+        <option value="user2">user2</option>
+        <option value="user3">user3</option>
+      </select>
+    </div>
   </header>
 
   <main class="container">
@@ -51,17 +59,34 @@
   </main>
 
   <script>
-    let host = "https://trading-simulator-latest.onrender.com";
+    let host = "https://trading-simulator-part2-latest.onrender.com";
 
     let balance = null;
     let totalValue = null;
     let holdings = {};
 
+    function getCurrentUser() {
+      return localStorage.getItem('currentUserId') || 'user1';
+    }
+
+    function setCurrentUser(userId) {
+      localStorage.setItem('currentUserId', userId);
+      window.location.reload();
+    }
+
     displayPortfolio();
     setInterval(refreshPortfolio, 5000);
 
+    document.addEventListener('DOMContentLoaded', function() {
+      const select = document.getElementById('user-select');
+      select.value = getCurrentUser();
+      select.addEventListener('change', function(e) {
+        setCurrentUser(e.target.value);
+      });
+    });
+
     async function getBalance() {
-      let response = await fetch(host + "/portfolio/balance");
+      let response = await fetch(host + "/portfolio/balance?userId=" + getCurrentUser());
       if (!response.ok) {
         throw new Error("Unable to load balance.");
       }
@@ -70,7 +95,7 @@
     }
 
     async function getTotalValue() {
-      let response = await fetch(host + "/portfolio/totalvalue");
+      let response = await fetch(host + "/portfolio/totalvalue?userId=" + getCurrentUser());
       if (!response.ok) {
         throw new Error("Unable to load total value.");
       }
@@ -79,7 +104,7 @@
     }
 
     async function getHoldings() {
-      let response = await fetch(host + "/portfolio/holdings");
+      let response = await fetch(host + "/portfolio/holdings?userId=" + getCurrentUser());
       if (!response.ok) {
         throw new Error("Unable to load holdings.");
       }
