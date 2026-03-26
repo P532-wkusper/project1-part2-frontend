@@ -390,6 +390,7 @@
         if (!response.ok) {
           message.className = "message error";
           message.textContent = resultText;
+          showToast("Error: " + resultText);
           return;
         }
 
@@ -397,9 +398,11 @@
 
         message.className = "message success";
         message.textContent = resultText;
+        showToast(resultText);
       } catch (error) {
         message.className = "message error";
         message.textContent = "Unable to reach backend.";
+        showToast("Error: Unable to reach backend");
       }
     }
   </script>
