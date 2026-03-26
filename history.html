@@ -106,8 +106,26 @@
       });
       document.getElementById('dashboard-notif').addEventListener('change', function(e) {
         updateNotificationSetting(currentUser, 'dashboard', e.target.checked);
+        if (e.target.checked) {
+          showToast('Dashboard notifications enabled');
+        }
       });
     });
+
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(function() {
+        toast.classList.add('removing');
+        setTimeout(function() {
+          toast.remove();
+        }, 300);
+      }, 15000);
+    }
 
     async function getTrades() {
       let response = await fetch(host + "/portfolio/trades?userId=" + getCurrentUser());
@@ -212,5 +230,7 @@
       }
     }
   </script>
+
+  <div id="toast-container" class="toast-container"></div>
 </body>
 </html>
