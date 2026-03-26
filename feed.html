@@ -15,12 +15,19 @@
       <a href="history.html">History</a>
     </nav>
     <div style="float: right; padding: 10px;">
-      <label for="user-select" style="color: white; margin-right: 5px;">User:</label>
+      <label for="user-select" style="color: white; margin-right: 15px;">User:</label>
       <select id="user-select" style="padding: 5px;">
         <option value="user1">user1</option>
         <option value="user2">user2</option>
         <option value="user3">user3</option>
       </select>
+      <div id="notification-settings" style="display: inline-block; margin-left: 20px; vertical-align: top;">
+        <label style="color: white; margin-right: 10px; font-weight: bold;">Notifications:</label>
+        <label style="color: white; margin-right: 10px;"><input type="checkbox" id="console-notif" value="console"> Console</label>
+        <label style="color: white; margin-right: 10px;"><input type="checkbox" id="email-notif" value="email"> Email</label>
+        <label style="color: white; margin-right: 10px;"><input type="checkbox" id="sms-notif" value="sms"> SMS</label>
+        <label style="color: white;"><input type="checkbox" id="dashboard-notif" value="dashboard"> Dashboard</label>
+      </div>
     </div>
   </header>
 
@@ -28,6 +35,13 @@
     <section class="card">
       <h1>Market Feed</h1>
       <p>Live stock prices appear below and refresh automatically.</p>
+      
+      <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dcdcdc;">
+        <p style="font-weight: bold; margin-bottom: 8px;">Pricing Algorithm:</p>
+        <label style="margin-right: 20px;"><input type="radio" name="pricing-algo" value="randomwalk" checked> Random Walk</label>
+        <label style="margin-right: 20px;"><input type="radio" name="pricing-algo" value="meanreversion"> Mean Reversion</label>
+        <label><input type="radio" name="pricing-algo" value="trendfollowing"> Trend Following</label>
+      </div>
     </section>
 
     <section class="card">
@@ -48,14 +62,76 @@
       window.location.reload();
     }
 
+    function loadNotificationSettings(userId) {
+      fetch('/portfolio/notificationsettings?userId=' + userId)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('console-notif').checked = data.consoleEnabled;
+          document.getElementById('email-notif').checked = data.emailEnabled;
+          document.getElementById('sms-notif').checked = data.smsEnabled;
+          document.getElementById('dashboard-notif').checked = data.dashboardEnabled;
+        })
+        .catch(error => console.error('Error loading notification settings:', error));
+    }
+
+    function updateNotificationSetting(userId, setting, enabled) {
+      const params = new URLSearchParams();
+      params.append('userId', userId);
+      params.append(setting + 'Enabled', enabled);
+      
+      fetch('/portfolio/notificationsettings', {
+        method: 'POST',
+        body: params
+      })
+      .catch(error => console.error('Error updating notification setting:', error));
+    }
+
+    function switchPricingAlgorithm(algorithm) {
+      const params = new URLSearchParams();
+      params.append('algorithm', algorithm);
+      
+      fetch('/stocks/pricing-algorithm', {
+        method: 'POST',
+        body: params
+      })
+      .then(response => response.text())
+      .then(message => console.log('Pricing algorithm: ' + message))
+      .catch(error => console.error('Error switching algorithm:', error));
+    }
+
     displayStocks();
     setInterval(refreshStocks, 5000);
 
     document.addEventListener('DOMContentLoaded', function() {
+      const currentUser = getCurrentUser();
       const select = document.getElementById('user-select');
-      select.value = getCurrentUser();
+      select.value = currentUser;
       select.addEventListener('change', function(e) {
         setCurrentUser(e.target.value);
+      });
+
+      loadNotificationSettings(currentUser);
+
+      document.getElementById('console-notif').addEventListener('change', function(e) {
+        updateNotificationSetting(currentUser, 'console', e.target.checked);
+      });
+      document.getElementById('email-notif').addEventListener('change', function(e) {
+        updateNotificationSetting(currentUser, 'email', e.target.checked);
+      });
+      document.getElementById('sms-notif').addEventListener('change', function(e) {
+        updateNotificationSetting(currentUser, 'sms', e.target.checked);
+      });
+      document.getElementById('dashboard-notif').addEventListener('change', function(e) {
+        updateNotificationSetting(currentUser, 'dashboard', e.target.checked);
+      });
+
+      const pricingRadios = document.querySelectorAll('input[name="pricing-algo"]');
+      pricingRadios.forEach(radio => {
+        radio.addEventListener('change', function(e) {
+          if (e.target.checked) {
+            switchPricingAlgorithm(e.target.value);
+          }
+        });
       });
     });
 

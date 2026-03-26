@@ -15,12 +15,19 @@
       <a href="history.html">History</a>
     </nav>
     <div style="float: right; padding: 10px;">
-      <label for="user-select" style="color: white; margin-right: 5px;">User:</label>
+      <label for="user-select" style="color: white; margin-right: 15px;">User:</label>
       <select id="user-select" style="padding: 5px;">
         <option value="user1">user1</option>
         <option value="user2">user2</option>
         <option value="user3">user3</option>
       </select>
+      <div id="notification-settings" style="display: inline-block; margin-left: 20px; vertical-align: top;">
+        <label style="color: white; margin-right: 10px; font-weight: bold;">Notifications:</label>
+        <label style="color: white; margin-right: 10px;"><input type="checkbox" id="console-notif" value="console"> Console</label>
+        <label style="color: white; margin-right: 10px;"><input type="checkbox" id="email-notif" value="email"> Email</label>
+        <label style="color: white; margin-right: 10px;"><input type="checkbox" id="sms-notif" value="sms"> SMS</label>
+        <label style="color: white;"><input type="checkbox" id="dashboard-notif" value="dashboard"> Dashboard</label>
+      </div>
     </div>
   </header>
 
@@ -74,14 +81,54 @@
       window.location.reload();
     }
 
+    function loadNotificationSettings(userId) {
+      fetch('/portfolio/notificationsettings?userId=' + userId)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('console-notif').checked = data.consoleEnabled;
+          document.getElementById('email-notif').checked = data.emailEnabled;
+          document.getElementById('sms-notif').checked = data.smsEnabled;
+          document.getElementById('dashboard-notif').checked = data.dashboardEnabled;
+        })
+        .catch(error => console.error('Error loading notification settings:', error));
+    }
+
+    function updateNotificationSetting(userId, setting, enabled) {
+      const params = new URLSearchParams();
+      params.append('userId', userId);
+      params.append(setting + 'Enabled', enabled);
+      
+      fetch('/portfolio/notificationsettings', {
+        method: 'POST',
+        body: params
+      })
+      .catch(error => console.error('Error updating notification setting:', error));
+    }
+
     displayPortfolio();
     setInterval(refreshPortfolio, 5000);
 
     document.addEventListener('DOMContentLoaded', function() {
+      const currentUser = getCurrentUser();
       const select = document.getElementById('user-select');
-      select.value = getCurrentUser();
+      select.value = currentUser;
       select.addEventListener('change', function(e) {
         setCurrentUser(e.target.value);
+      });
+
+      loadNotificationSettings(currentUser);
+
+      document.getElementById('console-notif').addEventListener('change', function(e) {
+        updateNotificationSetting(currentUser, 'console', e.target.checked);
+      });
+      document.getElementById('email-notif').addEventListener('change', function(e) {
+        updateNotificationSetting(currentUser, 'email', e.target.checked);
+      });
+      document.getElementById('sms-notif').addEventListener('change', function(e) {
+        updateNotificationSetting(currentUser, 'sms', e.target.checked);
+      });
+      document.getElementById('dashboard-notif').addEventListener('change', function(e) {
+        updateNotificationSetting(currentUser, 'dashboard', e.target.checked);
       });
     });
 
