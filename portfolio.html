@@ -82,7 +82,7 @@
     }
 
     function loadNotificationSettings(userId) {
-      fetch('/portfolio/notificationsettings?userId=' + userId)
+      fetch(host + '/portfolio/notificationsettings?userId=' + userId)
         .then(response => response.json())
         .then(data => {
           document.getElementById('console-notif').checked = data.consoleEnabled;
@@ -98,8 +98,11 @@
       params.append('userId', userId);
       params.append(setting + 'Enabled', enabled);
       
-      fetch('/portfolio/notificationsettings', {
+      fetch(host + '/portfolio/notificationsettings', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
         body: params
       })
       .catch(error => console.error('Error updating notification setting:', error));
