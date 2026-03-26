@@ -34,6 +34,25 @@
 	<script>
 		let host = "https://trading-simulator-part2-latest.onrender.com";
 
+		function showToast(message) {
+			const container = document.getElementById('toast-container');
+			if (!container) {
+				console.error('Toast container not found');
+				return;
+			}
+			const toast = document.createElement('div');
+			toast.className = 'toast';
+			toast.textContent = message;
+			container.appendChild(toast);
+
+			setTimeout(function() {
+				toast.classList.add('removing');
+				setTimeout(function() {
+					toast.remove();
+				}, 300);
+			}, 15000);
+		}
+
 		function getCurrentUser() {
 			return localStorage.getItem('currentUserId') || 'user1';
 		}
@@ -91,7 +110,15 @@
 			});
 			document.getElementById('dashboard-notif').addEventListener('change', function(e) {
 				updateNotificationSetting(currentUser, 'dashboard', e.target.checked);
+				if (e.target.checked) {
+					showToast('Dashboard notifications enabled');
+				}
 			});
+
+			// Test toast on DOMContentLoaded
+			setTimeout(function() {
+				showToast('Test: Toast system is working!');
+			}, 500);
 		});
 	</script>
 

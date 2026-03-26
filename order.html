@@ -150,7 +150,34 @@
       .catch(error => console.error('Error updating notification setting:', error));
     }
 
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      if (!container) {
+        console.error('Toast container not found');
+        return;
+      }
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(function() {
+        toast.classList.add('removing');
+        setTimeout(function() {
+          toast.remove();
+        }, 300);
+      }, 15000);
+    }
+
     initializeOrderPage();
+
+    // Test toast on load
+    window.addEventListener('load', function() {
+      console.log('Page loaded, testing toast system');
+      setTimeout(function() {
+        showToast('Test: Toast system is working!');
+      }, 500);
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
       const currentUser = getCurrentUser();
@@ -178,21 +205,6 @@
         }
       });
     });
-
-    function showToast(message) {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = message;
-      container.appendChild(toast);
-
-      setTimeout(function() {
-        toast.classList.add('removing');
-        setTimeout(function() {
-          toast.remove();
-        }, 300);
-      }, 15000);
-    }
 
     function initializeOrderPage() {
       let form = document.getElementById("order-form");

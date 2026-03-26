@@ -111,9 +111,9 @@ th {
   padding: 16px;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  animation: slideIn 0.3s ease-out;
   margin-bottom: 10px;
   min-width: 250px;
+  display: block;
 }
 
 @keyframes slideIn {
